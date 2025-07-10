@@ -2,7 +2,10 @@ import * as React from "react";
 import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 
+import { useRouter } from "next/navigation";
+
 export interface FilmCardProps {
+  id: number;
   title: string;
   posterUrl: string;
   year: number;
@@ -10,11 +13,13 @@ export interface FilmCardProps {
 }
 
 export const FilmCard: React.FC<FilmCardProps> = ({
+  id,
   title,
   posterUrl,
   year,
   rating,
 }) => {
+  const router = useRouter();
   return (
     <Card
       sx={{
@@ -30,6 +35,7 @@ export const FilmCard: React.FC<FilmCardProps> = ({
         backgroundColor: "#ffffff",
         cursor: "pointer",
       }}
+      onClick={() => router.push(`/film/${id}`)}
     >
       <CardMedia
         component="img"

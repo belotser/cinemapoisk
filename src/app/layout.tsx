@@ -1,7 +1,6 @@
 import "../styles/globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Container } from "@mui/material";
 import styles from "../styles/layout.module.css";
 
 const geistSans = Geist({
@@ -15,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CINEMAPOISK",
+  title: "СИНЕМАПОИСК",
   description: "найди кино под себя",
 };
 
@@ -27,10 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Container maxWidth="xl" className={styles.header}>
-          <h3>CINEMAPOISK</h3>
+        <header className={styles.header}>
+          <h3>СИНЕМАПОИСК</h3>
           <h5>найди кино под себя</h5>
-        </Container>
+        </header>
         {children}
       </body>
     </html>

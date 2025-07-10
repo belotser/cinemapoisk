@@ -1,0 +1,71 @@
+.filmContainer {
+  padding-bottom: 75px;
+}
+
+.cardSkeleton {
+  border-radius: 16px;
+}
+
+.filmContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 64px;
+}
+
+.filmCardSubtitle {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.filmCardTextContent {
+  padding: 24px;
+}
+
+.filmDescr {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.filmInfoItem {
+  margin-bottom: 25px;
+}
+
+.filmGenresList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.filmCardGenre {
+  padding: 12px 16px;
+}
+
+.filmCardGenreText {
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.errorMessage {
+  margin-top: 10px;
+}
+
+.link {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 25px;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.link svg {
+  font-size: 18px;
+  margin-left: 2px;
+  transition: 0.15s;
+}
+
+.link:hover svg {
+  margin-left: 0;
+  margin-right: 2px;
+}
