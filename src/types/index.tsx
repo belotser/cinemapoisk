@@ -151,3 +151,52 @@ export interface Film {
   updatedAt: string;
   createdAt: string;
 }
+
+export interface FavoriteFilm {
+  title: string;
+  posterUrl: string;
+  year: number;
+  rating: number;
+}
+
+export interface FavoriteList {
+  [key: string]: FavoriteFilm;
+}
+
+export interface FilmCardProps {
+  id: number;
+  title: string;
+  posterUrl: string;
+  year: number;
+  rating: number;
+  updateRef?: ((node: HTMLDivElement | null) => void) | null;
+}
+
+export type Genres = {
+  name: "string";
+  slug: "string";
+}[];
+
+export interface SearchParams extends OptionalSearchParams {
+  page: number;
+}
+
+export interface OptionalSearchParams {
+  ratingKP?: string;
+  year?: string;
+  genresNames?: string[];
+}
+
+export interface FiltersProps {
+  initialGenres: string[];
+  initialYearRange: number[];
+  initialRatingRange: number[];
+  genres: { name: string }[];
+  genresLoading: boolean;
+  genresError: Error | null;
+  onApply: (
+    genres: string[],
+    yearRange: number[],
+    ratingRange: number[]
+  ) => void;
+}

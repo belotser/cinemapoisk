@@ -1,7 +1,8 @@
-import "../styles/globals.css";
+import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import styles from "../styles/layout.module.css";
+import Link from "next/link";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,11 +27,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <header className={styles.header}>
-          <h3>СИНЕМАПОИСК</h3>
-          <h5>найди кино под себя</h5>
-        </header>
-        {children}
+        <QueryProvider>
+          <header className="header">
+            <div>
+              <h3>СИНЕМАПОИСК</h3>
+              <h5>найди кино под себя</h5>
+            </div>
+            <div className="header-links">
+              <Link href="/">Главная</Link>
+              <Link href="/favorite-films">Избранное</Link>
+            </div>
+          </header>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

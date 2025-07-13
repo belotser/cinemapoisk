@@ -1,0 +1,9 @@
+.ratingBox {
+  display: flex;
+  gap: 4;
+  align-items: center;
+}
+
+.ratingIcon {
+  color: orange;
+}

@@ -1,112 +1,70 @@
 "use client";
-import axios from "axios";
-import { use, useState, useEffect } from "react";
-import { Film } from "@/types/film";
-import { Container, Skeleton, Card, CardMedia } from "@mui/material";
-import Link from "next/link";
-import styles from "@/styles/Film.module.css";
-import { IoChevronBack } from "react-icons/io5";
 
-type ParamsPromise = Promise<{
-  id: string;
-}>;
+import { Container, Skeleton, Card, CardMedia, Box } from "@mui/material";
+import { IoStarOutline, IoStar } from "react-icons/io5";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 
-export default function FilmPage({ params }: { params: ParamsPromise }) {
-  const { id } = use(params);
-  const [data, setData] = useState<Film | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+import ModalConfirm from "@/components/ModalConfirm/ModalConfirm";
+import currentStore from "@/store/FavoriteStore";
+import styles from "./Film.module.css";
+import useFilm from "@/hooks/useFilm";
 
+export default function FilmPage() {
+  const { id } = useParams() as { id: string };
+
+  const [openModal, setOpenModal] = useState<"add" | "del" | null>(null);
+  const handleOpen = (type: "add" | "del") => () => setOpenModal(type);
+  const handleClose = () => setOpenModal(null);
+
+  const [isFavorite, setIsFavorite] = useState(false);
   useEffect(() => {
-    axios
-      .get(`https://api.kinopoisk.dev/v1.4/movie/${id}`, {
-        headers: {
-          "X-API-KEY": "4SAZ3GF-KGHMFYY-NBDWXP8-YSA853R",
-        },
-      })
-      .then((response) => {
-        setData(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error);
-        setLoading(false);
-      });
+    setIsFavorite(currentStore.has(id));
   }, [id]);
 
-  console.log(data?.year, data?.rating.kp, data?.rating.imdb);
+  const { data, isLoading, error } = useFilm(Number(id));
 
   return (
     <Container maxWidth="xl" className={styles.filmContainer}>
-      <Link href="/" className={styles.link}>
-        <IoChevronBack /> На главную
-      </Link>
-      {loading ? (
-        <div className={styles.filmContent}>
-          <Skeleton
-            variant="rectangular"
-            width={353}
-            height={583}
-            className={styles.cardSkeleton}
-          />
-          <div>
-            <div style={{ marginBottom: 16 }}>
-              <Skeleton variant="text" width={300} height={24} />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <Skeleton variant="text" width={150} height={38} />
-              <Skeleton
-                variant="rectangular"
-                width={650}
-                height={40}
-                sx={{ borderRadius: 2 }}
-              />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <Skeleton variant="text" width={150} height={38} />
-              <Skeleton
-                variant="rectangular"
-                height={300}
-                sx={{ borderRadius: 2 }}
-              />
-            </div>
-          </div>
-        </div>
+      {isLoading ? (
+        <SkeletonFilmPage />
       ) : error ? (
-        <div>
+        <>
           <h2>Ошибка при выполнении запроса</h2>
           <h5 className={styles.errorMessage}>{error.message}</h5>
-        </div>
+        </>
       ) : (
         data && (
           <div className={styles.filmContent}>
-            <Card
-              sx={{
-                minWidth: 353,
-                maxWidth: 353,
-                borderRadius: 4,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-              }}
-            >
-              <CardMedia
-                component="img"
-                alt={data.name}
-                height="507"
-                image={data.poster.url}
-                sx={{
-                  objectFit: "cover",
-                }}
-              />
+            <Card sx={sxStyles.filmMajorCard}>
+              {data.poster && data.poster.url ? (
+                <CardMedia
+                  component="img"
+                  alt={data.name}
+                  image={data.poster.url}
+                  sx={{
+                    objectFit: "cover",
+                    ...sxStyles.imageSizing,
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    backgroundColor: "gray",
+                    ...sxStyles.imageSizing,
+                  }}
+                />
+              )}
               <div className={styles.filmCardTextContent}>
-                <h2>{data.name}</h2>
+                <h2>{data.name || data.alternativeName}</h2>
               </div>
             </Card>
             <div>
               <div className={styles.filmInfoItem}>
                 <h4>
                   {data.year || "Н/Д"} год. Кинопоиск:{" "}
-                  {(data.rating?.kp ?? "Н/Д").toFixed(1)}, IMDb:{" "}
-                  {(data.rating?.imdb ?? "Н/Д").toFixed(1)}
+                  {getRatingStr(data.rating.kp)}, IMDb:{" "}
+                  {getRatingStr(data.rating.imdb)}
                 </h4>
               </div>
               {data.genres && data.genres.length > 0 && (
@@ -115,14 +73,7 @@ export default function FilmPage({ params }: { params: ParamsPromise }) {
                   <div className={styles.filmGenresList}>
                     {data.genres.map((genre, key) => {
                       return (
-                        <Card
-                          sx={{
-                            borderRadius: 4,
-                            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                          }}
-                          key={key}
-                          className={`${styles.filmCardTextContent} ${styles.filmCardGenre}`}
-                        >
+                        <Card sx={sxStyles.filmMinorCard} key={key}>
                           <p
                             className={`${styles.filmDescr} ${styles.filmCardGenreText}`}
                           >
@@ -137,21 +88,132 @@ export default function FilmPage({ params }: { params: ParamsPromise }) {
               {data.description && (
                 <div className={styles.filmInfoItem}>
                   <h3 className={styles.filmCardSubtitle}>Описание</h3>
-                  <Card
-                    sx={{
-                      borderRadius: 4,
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                    }}
-                    className={styles.filmCardTextContent}
-                  >
+                  <Card sx={sxStyles.filmMinorCard}>
                     <p className={styles.filmDescr}>{data.description}</p>
                   </Card>
                 </div>
               )}
+              <ModalConfirm
+                text={"Сделать избранным?"}
+                isVisible={openModal === "add"}
+                handleClose={handleClose}
+                confirmFn={() => {
+                  setIsFavorite(true);
+                  currentStore.push({
+                    id: Number(id),
+                    title: data.name || data.alternativeName,
+                    posterUrl: data.poster?.url,
+                    year: data.year,
+                    rating: data.rating.kp || data.rating.imdb || 0,
+                  });
+                }}
+              />
+              <ModalConfirm
+                text={"Удалить из избранного?"}
+                isVisible={openModal === "del"}
+                handleClose={handleClose}
+                confirmFn={() => {
+                  setIsFavorite(false);
+                  currentStore.del(id);
+                }}
+              />
+              <div className={styles.filmInfoItem}>
+                {isFavorite ? (
+                  <Card sx={sxStyles.favoriteCard} onClick={handleOpen("del")}>
+                    <IoStar />
+                    <p className={styles.favoriteText}>В избранном</p>
+                  </Card>
+                ) : (
+                  <Card sx={sxStyles.favoriteCard} onClick={handleOpen("add")}>
+                    <>
+                      <IoStarOutline />
+                      <p className={styles.favoriteText}>Сделать избранным</p>
+                    </>
+                  </Card>
+                )}
+              </div>
             </div>
           </div>
         )
       )}
     </Container>
+  );
+}
+
+const sxStyles = {
+  favoriteCard: {
+    borderRadius: 4,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    display: "inline-block",
+    maxWidth: "100%",
+    transition: "0.15s",
+    cursor: "pointer",
+    padding: "18px 24px",
+    "&:hover": {
+      transform: "scale(1.03)",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+    },
+  },
+
+  imageSizing: {
+    width: "100%",
+    height: "505px",
+  },
+
+  filmMajorCard: {
+    minWidth: 353,
+    maxWidth: 353,
+    width: 353,
+    borderRadius: 4,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+  },
+
+  filmMinorCard: {
+    borderRadius: 4,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    padding: "12px 16px",
+  },
+};
+
+function getRatingStr(rating: number | null) {
+  if (rating) {
+    return rating.toFixed(1);
+  } else {
+    return "Н/Д";
+  }
+}
+
+function SkeletonFilmPage() {
+  return (
+    <div className={styles.filmContent}>
+      <Skeleton
+        variant="rectangular"
+        width={353}
+        height={583}
+        className={styles.cardSkeleton}
+      />
+      <div>
+        <div style={{ marginBottom: 16 }}>
+          <Skeleton variant="text" width={300} height={24} />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <Skeleton variant="text" width={150} height={38} />
+          <Skeleton
+            variant="rectangular"
+            width={650}
+            height={40}
+            sx={{ borderRadius: 2 }}
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <Skeleton variant="text" width={150} height={38} />
+          <Skeleton
+            variant="rectangular"
+            height={300}
+            sx={{ borderRadius: 2 }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

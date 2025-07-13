@@ -40,3 +40,19 @@ a {
     color-scheme: dark;
   }
 }
+
+.header {
+  max-width: 1536px;
+  margin: 25px auto 50px;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.header-links {
+  display: flex;
+  gap: 24px;
+}
