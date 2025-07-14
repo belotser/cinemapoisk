@@ -26,8 +26,6 @@ export default function useSearch(params: SearchParams) {
       });
     }
 
-    console.log(query);
-
     return query;
   }
 

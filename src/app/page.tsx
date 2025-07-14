@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { FilmCard } from "../components/FilmCard/FilmCard";
 import { Film, OptionalSearchParams, FiltersProps } from "@/types";
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, memo } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import useSearch from "@/hooks/useSearch";
@@ -153,22 +153,10 @@ export default function Home() {
             <h3>Произошла ошибка...</h3>
             <h6>{error.message}</h6>
           </div>
+        ) : filmList.length > 0 ? (
+          <FilmList films={filmList} lastRef={lastRef} />
         ) : (
-          filmList.length > 0 &&
-          filmList.map((item, index) => {
-            const isLast = index == 49 * nextPage;
-            return (
-              <FilmCard
-                id={item.id}
-                key={`${item.id}-${index}`}
-                title={item.name || item.alternativeName}
-                year={item.year}
-                rating={item.rating.kp ? item.rating.kp : item.rating.imdb}
-                posterUrl={item.poster?.url}
-                updateRef={isLast ? lastRef : null}
-              />
-            );
-          })
+          "ничего не нашлось..."
         )}
         {isLoading &&
           [...Array(18)].map((_, index) => (
@@ -186,6 +174,35 @@ export default function Home() {
     </Container>
   );
 }
+
+const FilmList = memo(function FilmListComponent({
+  films,
+  lastRef,
+}: {
+  films: Film[];
+  lastRef: (node: HTMLDivElement | null) => void;
+}) {
+  const items = useMemo(
+    () =>
+      films.map((item, index) => {
+        const isLast = index === films.length - 1;
+        return (
+          <FilmCard
+            id={item.id}
+            key={item.id}
+            title={item.name || item.alternativeName}
+            year={item.year}
+            rating={item.rating.kp ?? item.rating.imdb}
+            posterUrl={item.poster?.url}
+            updateRef={isLast ? lastRef : null}
+          />
+        );
+      }),
+    [films, lastRef]
+  );
+
+  return <div className={styles.filmList}>{items}</div>;
+});
 
 function Filters({
   initialGenres,
